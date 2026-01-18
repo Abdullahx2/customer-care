@@ -4,7 +4,7 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     '@nuxtjs/mdc',
-    '@nuxthub/core', // Keep module but disable its DB
+    // '@nuxthub/core', // TEMPORARY DISABLE - causing useUpload error
     'nuxt-auth-utils',
     'nuxt-charts'
   ],
