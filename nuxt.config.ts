@@ -4,7 +4,7 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     '@nuxtjs/mdc',
-    '@nuxthub/core',
+    '@nuxthub/core', // Keep module but disable its DB
     'nuxt-auth-utils',
     'nuxt-charts'
   ],
@@ -37,9 +37,10 @@ export default defineNuxtConfig({
     }
   },
 
+  // SQLite disabled for Vercel
   hub: {
-    db: 'sqlite',
-    blob: true
+    // db: 'sqlite',   // DISABLED - Vercel not support SQLite
+    // blob: true      // DISABLED
   },
 
   eslint: {
