@@ -1,4 +1,6 @@
 export default defineEventHandler(async () => {
-  // SQLite / DB disabled for Vercel
+  // DB disabled for Vercel (SQLite not supported)
+  // Temporary safe response
+
   return []
 })
