@@ -1,5 +1,6 @@
 import type { UIMessage } from 'ai'
-import { db, schema } from 'hub:db'
+// import { db, schema } from 'hub:db'
+
 import { z } from 'zod'
 
 export default defineEventHandler(async (event) => {
@@ -9,21 +10,18 @@ export default defineEventHandler(async (event) => {
     message: z.custom<UIMessage>()
   }).parse)
 
-  const [chat] = await db.insert(schema.chats).values({
-    id,
-    title: '',
-    userId: session.user?.id || session.id
-  }).returning()
+// const [chat] = await db.insert(schema.chats).values({
+//   id,
+//   title: '',
+//   userId: session.user?.id || session.id
+// }).returning()
 
-  if (!chat) {
-    throw createError({ statusCode: 500, statusMessage: 'Failed to create chat' })
-  }
+// if (!chat) {
+//   throw createError({ statusCode: 500, statusMessage: 'Failed to create chat' })
+// }
 
-  await db.insert(schema.messages).values({
-    chatId: chat.id,
-    role: 'user',
-    parts: message.parts
-  })
-
-  return chat
-})
+// await db.insert(schema.messages).values({
+//   chatId: chat.id,
+//   role: 'user',
+//   parts: message.parts
+// })
