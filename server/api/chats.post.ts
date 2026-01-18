@@ -7,7 +7,7 @@ const openai = new OpenAI({
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
-    const { message } = body
+    const { id, message } = body
 
     // OpenAI call
     const completion = await openai.chat.completions.create({
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
         },
         {
           role: 'user',
-          content: message
+          content: message.parts?.[0]?.text || message
         }
       ],
       temperature: 0.7
@@ -27,17 +27,18 @@ export default defineEventHandler(async (event) => {
 
     const reply = completion.choices[0]?.message?.content || 'Sorry, I could not generate a reply.'
 
+    // ✅ Frontend expects this structure
     return {
-      id: Date.now().toString(),
-      role: 'assistant',
-      content: reply
+      id: id || crypto.randomUUID(),
+      title: (message.parts?.[0]?.text || 'New Chat').substring(0, 30),
+      userId: 'temporary-user'
     }
   } catch (error) {
     console.error('OpenAI error:', error)
     return {
       id: 'error',
-      role: 'assistant',
-      content: 'I am having trouble responding. Please try again.'
+      title: 'Error',
+      userId: 'error'
     }
   }
 })
