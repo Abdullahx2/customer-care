@@ -1,7 +1,7 @@
 import { OpenAI } from 'openai'
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY || ''
 })
 
 export default defineEventHandler(async (event) => {
@@ -9,44 +9,49 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const { id, message } = body
 
-    // ✅ SAFE text extraction
     const userText =
       message?.parts?.[0]?.text ||
       message?.content ||
-      ''
+      String(message || '').slice(0, 500)
 
-    if (!userText) {
-      throw new Error('Empty message')
+    if (!userText.trim()) {
+      return {
+        id: id || crypto.randomUUID(),
+        title: 'Empty Query',
+        userId: 'temp'
+      }
     }
 
-    // ✅ OpenAI call
-    await openai.chat.completions.create({
+    const systemPrompt = `You are a senior customer care agent.
+Always be polite, calm, professional, and helpful.`
+
+    const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        {
-          role: 'system',
-          content:
-            'You are a customer care expert. Always be polite, clear, and professional.'
-        },
-        {
-          role: 'user',
-          content: userText
-        }
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userText }
       ],
-      temperature: 0.7
+      temperature: 0.7,
+      max_tokens: 300
     })
 
-    // ✅ Frontend ko sirf chat meta chahiye
+    const aiReply =
+      completion.choices[0]?.message?.content ||
+      "Thank you for contacting support."
+
     return {
       id: id || crypto.randomUUID(),
-      title: userText.substring(0, 30),
-      userId: 'temporary-user'
+      title: userText.slice(0, 30),
+      userId: 'customer',
+      aiReply
     }
   } catch (error) {
-    console.error('Chats API error:', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Chat creation failed'
-    })
+    console.error(error)
+    return {
+      id: 'error',
+      title: 'Support',
+      userId: 'error',
+      aiReply: 'Something went wrong. Please try again.'
+    }
   }
 })
