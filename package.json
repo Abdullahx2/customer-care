@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-ui-template-chat",
+  "name": "customer-care-by-jv",
   "private": true,
   "type": "module",
   "scripts": {
@@ -23,6 +23,7 @@
     "@nuxthub/core": "^0.10.3",
     "@nuxtjs/mdc": "^0.19.1",
     "ai": "^6.0.5",
+    "openai": "^4.0.0",
     "@vercel/blob": "^2.0.0",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
