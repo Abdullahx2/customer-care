@@ -1,26 +1,20 @@
-import { db, schema } from 'hub:db'
-import { and, asc, eq } from 'drizzle-orm'
-
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
+  const { id } = event.context.params!
 
-  const { id } = getRouterParams(event)
-
-  const chat = await db.query.chats.findFirst({
-    where: () => and(
-      eq(schema.chats.id, id as string),
-      eq(schema.chats.userId, session.user?.id || session.id)
-    ),
-    with: {
-      messages: {
-        orderBy: () => asc(schema.messages.createdAt)
+  return {
+    id,
+    title: 'New Chat',
+    messages: [
+      {
+        id: 'user-1',
+        role: 'user',
+        content: 'Hi'
+      },
+      {
+        id: 'assistant-1',
+        role: 'assistant',
+        content: 'Hello 👋 How can I help you?'
       }
-    }
-  })
-
-  if (!chat) {
-    throw createError({ statusCode: 404, statusMessage: 'Chat not found' })
+    ]
   }
-
-  return chat
 })
