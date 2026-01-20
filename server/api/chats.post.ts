@@ -1,7 +1,7 @@
 import { OpenAI } from 'openai'
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || ''
+  apiKey: process.env.OPENAI_API_KEY
 })
 
 export default defineEventHandler(async (event) => {
@@ -9,36 +9,44 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const { id, message } = body
 
-    // OpenAI call
-    const completion = await openai.chat.completions.create({
+    // ✅ SAFE text extraction
+    const userText =
+      message?.parts?.[0]?.text ||
+      message?.content ||
+      ''
+
+    if (!userText) {
+      throw new Error('Empty message')
+    }
+
+    // ✅ OpenAI call
+    await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: `You are a customer care expert. Always be polite, never blame the client, explain clearly, and end professionally.`
+          content:
+            'You are a customer care expert. Always be polite, clear, and professional.'
         },
         {
           role: 'user',
-          content: message.parts?.[0]?.text || message
+          content: userText
         }
       ],
       temperature: 0.7
     })
 
-    const reply = completion.choices[0]?.message?.content || 'Sorry, I could not generate a reply.'
-
-    // ✅ Frontend expects this structure
+    // ✅ Frontend ko sirf chat meta chahiye
     return {
       id: id || crypto.randomUUID(),
-      title: (message.parts?.[0]?.text || 'New Chat').substring(0, 30),
+      title: userText.substring(0, 30),
       userId: 'temporary-user'
     }
   } catch (error) {
-    console.error('OpenAI error:', error)
-    return {
-      id: 'error',
-      title: 'Error',
-      userId: 'error'
-    }
+    console.error('Chats API error:', error)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Chat creation failed'
+    })
   }
 })
